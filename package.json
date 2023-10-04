@@ -1,6 +1,6 @@
 {
   "name": "midway-component-s3",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "midway s3 component",
   "main": "dist/index.js",
   "typings": "index.d.ts",
@@ -30,6 +30,7 @@
     "assert": "^2.1.0"
   },
   "devDependencies": {
+    "@types/assert": "^1.5.7",
     "rimraf": "^5.0.5"
   }
 }

@@ -15,41 +15,36 @@ import * as assert from 'assert';
 
 import {
   AssumeRoleCommand,
+  AssumeRoleCommandInput,
   AssumeRoleCommandOutput,
   STSClient,
   STSClientConfig,
 } from '@aws-sdk/client-sts';
-import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
+import { S3Client, S3ClientConfig,S3ClientResolvedConfig } from '@aws-sdk/client-s3';
 
 export class S3ServiceClient extends S3Client {
-  async assumeRole(): Promise<AssumeRoleCommandOutput> {
-    const command = new AssumeRoleCommand({
-      RoleArn: '',
-      RoleSessionName: '',
-      Policy: JSON.stringify({
-        Version: '2012-10-17', // 协议版本，固定值
-        Statement: [
-          {
-            Effect: 'Allow',
-            Action: ['s3:GetObject', 's3:GetBucketLocation'],
-            Resource: ['arn:aws:s3:::*'],
-          },
-        ],
-      }),
-      DurationSeconds: 3600, // 临时凭证有效期，单位秒，最小900，最大3600
-    });
-
-    const endpoint = await this.config.endpoint();
-    const region = await this.config.region();
-    const credentials = await this.config.credentials();
-
-    const config: STSClientConfig = {
-      endpoint,
-      region,
-      credentials,
-    };
-
+  /**
+   * 获取临时凭证
+   * @param params 参数
+   * @returns 返回值
+   */
+  async assumeRole(params:AssumeRoleCommandInput): Promise<AssumeRoleCommandOutput> {
+    const command = new AssumeRoleCommand(params);
+    const config = await transform(this.config);
     return new STSClient(config).send(command);
+  }
+}
+
+/**
+ * 将 S3 Client 配置转换为 STS Client 配置
+ * @param config S3 Client 配置
+ * @returns STS Client 配置
+ */
+export async function transform(config:S3ClientResolvedConfig):Promise<STSClientConfig> {
+  return {
+    endpoint: await config.endpoint(),
+    region: await config.region(),
+    credentials: await config.credentials(),
   }
 }
 
