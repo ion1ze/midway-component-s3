@@ -1,0 +1,23 @@
+{
+  "name": "midway-component-s3",
+  "version": "0.0.1",
+  "description": "midway s3 component",
+  "main": "dist/index.js",
+  "typings": "index.d.ts",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.421.0",
+    "@aws-sdk/client-sts": "^3.423.0",
+    "@midwayjs/core": "^3.12.3"
+  }
+}
