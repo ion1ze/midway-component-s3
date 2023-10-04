@@ -67,7 +67,7 @@ export class S3ServiceFactory extends ServiceFactory<S3ServiceClient> {
       !!config.credentials,
       '[@midwayjs/s3] credentials are required on config]'
     );
-    this.logger.info('[midway:s3] init %s', JSON.stringify(config));
+    this.logger.debug('[midway:s3] init %s', JSON.stringify(config));
     return new S3ServiceClient(config);
   }
 
