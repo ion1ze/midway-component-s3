@@ -13,44 +13,11 @@ import {
 } from '@midwayjs/core';
 import * as assert from 'assert';
 
-import {
-  AssumeRoleCommand,
-  AssumeRoleCommandInput,
-  AssumeRoleCommandOutput,
-  STSClient,
-  STSClientConfig,
-} from '@aws-sdk/client-sts';
-import { S3Client, S3ClientConfig,S3ClientResolvedConfig } from '@aws-sdk/client-s3';
-
-export class S3ServiceClient extends S3Client {
-  /**
-   * 获取临时凭证
-   * @param params 参数
-   * @returns 返回值
-   */
-  async assumeRole(params:AssumeRoleCommandInput): Promise<AssumeRoleCommandOutput> {
-    const command = new AssumeRoleCommand(params);
-    const config = await transform(this.config);
-    return new STSClient(config).send(command);
-  }
-}
-
-/**
- * 将 S3 Client 配置转换为 STS Client 配置
- * @param config S3 Client 配置
- * @returns STS Client 配置
- */
-export async function transform(config:S3ClientResolvedConfig):Promise<STSClientConfig> {
-  return {
-    endpoint: await config.endpoint(),
-    region: await config.region(),
-    credentials: await config.credentials(),
-  }
-}
+import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3';
 
 @Provide()
 @Scope(ScopeEnum.Singleton)
-export class S3ServiceFactory extends ServiceFactory<S3ServiceClient> {
+export class S3ServiceFactory extends ServiceFactory<S3Client> {
   @Config('s3')
   clientConfig: S3ClientConfig;
 
@@ -62,13 +29,13 @@ export class S3ServiceFactory extends ServiceFactory<S3ServiceClient> {
     await this.initClients(this.clientConfig);
   }
 
-  async createClient(config: S3ClientConfig): Promise<S3ServiceClient> {
+  async createClient(config: S3ClientConfig): Promise<S3Client> {
     assert(
       !!config.credentials,
       '[@midwayjs/s3] credentials are required on config]'
     );
     this.logger.debug('[midway:s3] init %s', JSON.stringify(config));
-    return new S3ServiceClient(config);
+    return new S3Client(config);
   }
 
   getName(): string {
@@ -78,11 +45,11 @@ export class S3ServiceFactory extends ServiceFactory<S3ServiceClient> {
 
 @Provide()
 @Scope(ScopeEnum.Singleton)
-export class S3Service implements S3ServiceClient {
+export class S3Service implements S3Client {
   @Inject()
   private serviceFactory: S3ServiceFactory;
 
-  private instance: S3ServiceClient;
+  private instance: S3Client;
 
   @Init()
   async init() {
@@ -96,8 +63,8 @@ export class S3Service implements S3ServiceClient {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface S3Service extends S3ServiceClient {
+export interface S3Service extends S3Client {
   // empty
 }
 
-delegateTargetPrototypeMethod(S3Service, [S3ServiceClient]);
+delegateTargetPrototypeMethod(S3Service, [S3Client]);
